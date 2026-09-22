@@ -24,6 +24,7 @@ def filter_data(data,
                 start_hour=12,
                 end_hour=13,
                 upper_bound=4000,
+                lower_bound=0,
                 cols=["time", "height", "altitude", "v", "beta", "beta_raw"]):
 
     # Time window (with +30 min offset)
@@ -35,6 +36,7 @@ def filter_data(data,
 
     # Apply height filter
     data = data[data["height"] < upper_bound]
+    data = data[data["height"] > lower_bound]
 
     # Select columns
     data = data[cols]
