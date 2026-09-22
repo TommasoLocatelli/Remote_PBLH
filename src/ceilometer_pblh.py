@@ -252,12 +252,12 @@ if __name__=='__main__':
     netcdf=read_netcdf(path)
     data=netcdf.data
     data=filter_data(netcdf.data, 
-                    start_hour=2,
-                    end_hour=23,
+                    start_hour=0,
+                    end_hour=24,
                     upper_bound=2000,
                     lower_bound=50,
                     cols=["time", "height", "altitude", "beta", "beta_raw", "beta_smooth"])
-    BETA_CLMN='beta_smooth'
+    BETA_CLMN='beta_raw'
     #describe_data(data)
     #plot_beta(data, beta_clmn='beta_smooth')
     data = compute_beta_derivatives(

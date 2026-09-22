@@ -1,3 +1,5 @@
+import pandas as pd
+
 def describe_data(data):
     print("Shape:", data.shape)
 
