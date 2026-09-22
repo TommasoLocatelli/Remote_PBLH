@@ -2,7 +2,7 @@ from utils.netcdf import read_netcdf
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
-from doppler_lidar_pblh import describe_data, filter_data
+from utils.preprocessing import describe_data, filter_data
 
 def plots_wind(data):
     """
