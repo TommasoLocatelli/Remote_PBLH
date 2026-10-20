@@ -5,6 +5,17 @@ from utils.preprocessing import describe_data, filter_data
 import numpy as np
 from scipy.signal import savgol_filter
 
+TEXT_SIZE=16
+plt.rcParams.update({
+    #"font.size": 5,            # Base font size
+    "axes.titlesize": TEXT_SIZE,       # Subplot titles
+    "axes.labelsize": TEXT_SIZE,       # Axis labels
+    "xtick.labelsize": TEXT_SIZE,      # Tick labels
+    "ytick.labelsize": TEXT_SIZE,
+    "legend.fontsize": TEXT_SIZE,      # Legend text
+    "figure.titlesize": TEXT_SIZE,     # Suptitle
+})
+
 def plot_beta(data, beta_clmn="beta"):
     """
     Time–height pcolormesh plot of attenuated backscatter (beta).
@@ -123,30 +134,45 @@ def plot_beta_derivatives(data, beta_clmn="beta", pblh=None):
 
     # --- Beta ---
     pcm0 = axes[0].pcolormesh(times, heights, beta.T,
-                              shading="auto", cmap="viridis",
+                              shading="auto", cmap="RdBu_r", #cmap="viridis",
                               vmin=0, vmax=1e-6)
     axes[0].set_ylabel("Height [m]")
-    axes[0].set_title(f"{beta_clmn} (Attenuated Backscatter)")
+    axes[0].set_title(f"{beta_clmn.capitalize()} (Attenuated Backscatter)")
     fig.colorbar(pcm0, ax=axes[0]).set_label("beta [1/(m·sr)]")
 
     # --- First derivative ---
-    pcm1 = axes[1].pcolormesh(times, heights, d1.T,
-                              shading="auto", cmap="RdBu_r")
+    lim1 = np.nanpercentile(np.abs(d1.values), 99)
+
+    pcm1 = axes[1].pcolormesh(
+        times, heights, d1.T,
+        shading="auto",
+        cmap="viridis",#cmap="RdBu_r",
+        vmin=-lim1,
+        vmax=lim1
+    )
+
     axes[1].set_ylabel("Height [m]")
     axes[1].set_title(f"First derivative ∂({beta_clmn})/∂z")
     fig.colorbar(pcm1, ax=axes[1]).set_label("dβ/dz")
 
     # --- Second derivative ---
-    pcm2 = axes[2].pcolormesh(times, heights, d2.T,
-                              shading="auto", cmap="RdBu_r")
+    lim2 = np.nanpercentile(np.abs(d2.values), 99)
+
+    pcm2 = axes[2].pcolormesh(
+        times, heights, d2.T,
+        shading="auto",
+        cmap="viridis",#cmap="RdBu_r",
+        vmin=-lim2,
+        vmax=lim2
+    )
     axes[2].set_ylabel("Height [m]")
     axes[2].set_xlabel("Time")
     axes[2].set_title(f"Second derivative ∂²({beta_clmn})/∂z²")
     fig.colorbar(pcm2, ax=axes[2]).set_label("d²β/dz²")
 
     if pblh is not None:
-        overlay_pblh_beta(axes[0], pblh, label="pblh_first", color='yellow')
-        overlay_pblh_beta(axes[0], pblh, label="pblh_second", color='red')
+        overlay_pblh_beta(axes[0], pblh, label="pblh_first", color="#D336CEAC")
+        overlay_pblh_beta(axes[0], pblh, label="pblh_second", color="#38AD29B2")
 
     plt.tight_layout()
     plt.show()
@@ -238,12 +264,19 @@ def compute_pblh_beta(data, beta_clmn="beta"):
     return pblh
 
 def overlay_pblh_beta(ax, pblh, label, color):
+
+    map_labels = {
+        'pblh_first': 'PBLH dβ/dz',
+        'pblh_second': 'PBLH d²β/dz²'
+    }
     ax.plot(
         pblh["time"],
         pblh[label],
         color=color,
         linewidth=2,
-        label=label
+        label=map_labels[label],
+        ls='-',
+        alpha=0.8
     )
     ax.legend(loc="upper right")   # fast + stable
 
@@ -257,7 +290,7 @@ if __name__=='__main__':
                     upper_bound=2000,
                     lower_bound=50,
                     cols=["time", "height", "altitude", "beta", "beta_raw", "beta_smooth"])
-    BETA_CLMN='beta_raw'
+    BETA_CLMN='beta'
     #describe_data(data)
     #plot_beta(data, beta_clmn='beta_smooth')
     data = compute_beta_derivatives(
